@@ -3,6 +3,7 @@ package src.main;
 import models.Post;
 import spark.ModelAndView;
 import spark.template.handlebars.HandlebarsTemplateEngine;
+import util.JsonUtil;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,11 +39,11 @@ public class App {
         });
         post("/posts/new",(request, response) -> {
            String content = request.queryParams("content");
-           Post post = new Post("content");
+           Post post = new Post(content);
            return "success";
         });
-        post("/posts/all",(request, response) -> {
+        get("/posts/all",(request, response) -> {
             return Post.getAllPosts();
-        });
+        }, JsonUtil.json());
     }
 }
