@@ -1,6 +1,6 @@
 package src.main;
 
-import models.Post;
+import service.PostService;
 import spark.ModelAndView;
 import spark.template.handlebars.HandlebarsTemplateEngine;
 import util.JsonUtil;
@@ -14,36 +14,40 @@ import static spark.Spark.staticFileLocation;
 
 public class App {
 
+    static PostService postService = new PostService();
+
     public static void main(String[] args) {
         staticFileLocation("/public");
-        get("/hello", (request, response) ->{
+        get("/hello", (request, response) -> {
             return new ModelAndView(new HashMap(), "hello.hbs");
         }, new HandlebarsTemplateEngine());
-        get("/favourite_photos",(request, response) -> {
+
+        get("/favourite_photos", (request, response) -> {
             return new ModelAndView(new HashMap(), "favourite_friend.hbs");
         }, new HandlebarsTemplateEngine());
-        get("/form",(request, response) -> {
-            Map<String,Object> model = new HashMap<>();
+
+        get("/form", (request, response) -> {
+            Map<String, Object> model = new HashMap<>();
             return new ModelAndView(model, "form.hbs");
         }, new HandlebarsTemplateEngine());
-        get("/greeting_card",(request, response) -> {
-            Map<String,Object> model = new HashMap<>();
+
+        get("/greeting_card", (request, response) -> {
+            Map<String, Object> model = new HashMap<>();
             String recipient = request.queryParams("recipient");
             String sender = request.queryParams("sender");
             model.put("recipient", recipient);
-            model.put("sender",sender);
+            model.put("sender", sender);
             return new ModelAndView(model, "hello.hbs");
         }, new HandlebarsTemplateEngine());
-        get("/",(request, response) -> {
-            return "welcome to the blog";
+
+        get("/", (request, response) -> "welcome to the blog");
+
+        post("/posts/new", (request, response) -> {
+            String content = request.queryParams("content");
+            postService.addPost(content);
+            return "success";
         });
-        post("/posts/new",(request, response) -> {
-           String content = request.queryParams("content");
-           Post post = new Post(content);
-           return "success";
-        });
-        get("/posts/all",(request, response) -> {
-            return Post.getAllPosts();
-        }, JsonUtil.json());
+        get("/posts/all", (request, response) -> postService.getAllPosts()
+                , JsonUtil.json());
     }
 }
